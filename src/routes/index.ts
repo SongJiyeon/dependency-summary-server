@@ -1,11 +1,16 @@
 import { Router } from 'express';
-import UserRouter from './Users';
 
-// Init router and path
+import UserRouter from './Users';
+import { findModules } from '../../util/index';
+
 const router = Router();
 
-// Add sub-routes
 router.use('/users', UserRouter);
 
-// Export the base-router
+router.post('/module_usage', (req, res, next) => {
+  const modules = findModules(req.body.path);
+
+  res.json({ modules });
+});
+ 
 export default router;

@@ -1,28 +1,39 @@
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import path from 'path';
-import helmet from 'helmet';
+require('dotenv').config();
+
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const path = require('path');
+const cors = require('cors');
+const helmet = require('helmet');
+const mongoose = require('mongoose');
 
 import express, { Request, Response, NextFunction } from 'express';
 import { BAD_REQUEST } from 'http-status-codes';
 import 'express-async-errors';
 
-import BaseRouter from './routes';
+import BaseRouter from './routes/index';
+import AuthRouter from './routes/auth';
 import logger from '@shared/Logger';
 
 
 // Init express
 const app = express();
 
+const DB_URL = process.env.NODE_ENV === 'testing' ? process.env.DB_TEST_HOST : process.env.DB_HOST;
 
-
-/************************************************************************************
- *                              Set basic express settings
- ***********************************************************************************/
+mongoose.set('useCreateIndex', true);
+mongoose.connect(DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false
+});
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(cookieParser());
+// app.use(express.urlencoded({extended: true}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+// app.use(cors({origin:"http://localhost:3000"}));
+app.set('jwt-secret', process.env.JWT_SECRET);
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === 'development') {
@@ -35,6 +46,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Add APIs
+app.use('/auth', AuthRouter);
 app.use('/api', BaseRouter);
 
 // Print API errors
