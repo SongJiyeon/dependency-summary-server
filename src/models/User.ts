@@ -1,6 +1,22 @@
-const mongoose = require('mongoose');
+import { Document, model, Types, Schema } from 'mongoose';
 
-const UserSchema = new mongoose.Schema({
+interface ModulesType {
+  _id: Types.ObjectId,
+  name: string,
+  value: number
+};
+
+interface UserType extends Document {
+  _id: Types.ObjectId,
+  node_id: string,
+  login: string,
+  name: string,
+  html_url: string,
+  avatar_url: string,
+  moduleUsed: ModulesType[]
+};
+
+const UserSchema = new Schema({
   node_id: {
     type: String,
     required: true,
@@ -21,7 +37,17 @@ const UserSchema = new mongoose.Schema({
   avatar_url: {
     type: String
   },
-  projects: [mongoose.ObjectId],
+  moduleUsed: [{
+    name: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    value: {
+      type: Number,
+      required: true
+    }
+  }]
 });
 
-module.exports = mongoose.model('User', UserSchema);
+export default model<UserType>('User', UserSchema);

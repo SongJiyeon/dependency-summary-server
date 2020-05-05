@@ -20,6 +20,7 @@
     "@babel/plugin-proposal-export-default-from",
     "@babel/plugin-proposal-logical-assignment-operators",
     "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-transform-react-jsx",
     [
         "@babel/plugin-proposal-pipeline-operator",
         {
