@@ -37,6 +37,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@types/babel__core": "^7.1.7",
     "@types/esprima": "^4.0.2",
+    "@types/jsonwebtoken": "^8.3.9",
     "@types/lodash": "^4.14.150",
     "@types/mongoose": "^5.7.15",
     "axios": "^0.19.2",

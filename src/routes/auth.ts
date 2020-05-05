@@ -1,46 +1,28 @@
 import { Router } from 'express';
-
-const jwt = require('jsonwebtoken')
-const User = require('../models/User');
-
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
+
+import User, { UserType } from '../models/User';
 
 const router = Router();
 
-router.get('/login', (req, res, next) => {
-  axios({
-    method: 'post',
-    url: 'https://github.com/login/oauth/access_token',
-    headers: { 'Accept': 'application/json' },
-    params: {
-      'client_id': process.env.GITHUB_CLIENT_ID,
-      'client_secret': process.env.GITHUB_CLIENT_SECRET,
-      'code': req.query.code
-    }
-  })
-  .then(response => {
-    axios({
+router.post('/login', async (req, res, next) => {
+  const githubUser: UserType = (
+    await axios({
       method: 'get',
       url: 'https://api.github.com/user',
-      headers: { 'Authorization': 'token ' + response.data.access_token }
+      headers: { 'Authorization': 'token ' + req.body.access_token }
     })
-    .then(async response => {
-      let user = await User.findOne({ node_id: response.data.node_id });
+  ).data;
 
-      if (!user) {
-        user = await User.create({ ...response.data });
-      }
+  const user = (await User.exists({ node_id: githubUser.node_id })) ?
+  await User.findOne({ node_id: githubUser.node_id })
+  : await User.create({ ...githubUser });
 
-      const token = jwt.sign({ user }, process.env.JWT_SECRET);
-      console.log(token);
-      return res.json({ "result": "ok", token });
-    })
-    .catch(error => console.log(error));
-  })
-  .catch(error => {
-    console.log('error ' + error);
-  });
+  const secret: string | undefined = process.env.JWT_SECRET;
+  const jwtToken = secret && jwt.sign({ user }, secret);
+  
+  res.header({ jwttoken: jwtToken }).json({ 'result': 'ok' });
 });
 
-// Export the base-router
 export default router;

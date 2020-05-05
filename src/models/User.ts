@@ -6,7 +6,7 @@ interface ModulesType {
   value: number
 };
 
-interface UserType extends Document {
+export interface UserType extends Document {
   _id: Types.ObjectId,
   node_id: string,
   login: string,
