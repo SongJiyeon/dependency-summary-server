@@ -2,31 +2,41 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 
-import User, { UserType } from '../models/User';
+import User from '../models/User';
 import Module from '../models/Module';
-import { findModules } from '../../util/index';
-import { JsonWebTokenError } from 'jsonwebtoken';
 
 const router = Router();
 
 router.post('/module_usage', (req, res, next) => {
-  const modules = findModules(req.body.path);
+  const modules: string[] = req.body.modules;
   const secret: string | undefined = process.env.JWT_SECRET;
 
-  const verifiedJWT: any = secret && jwt.verify(req.body.jwtToken, secret);
+  const verifiedUser: any = secret && jwt.verify(req.body.jwtToken, secret);
 
-  _.uniq(modules).forEach(async module => {
-    const user = (await Module.exists({ name: module })) ?
-    await Module.findOneAndUpdate({ name: module },
-    {
-      $inc: { value: 1 }
+  _.uniq(modules).forEach(async (module: string) => {
+    (await Module.exists({ name: module })) ?
+    await Module.findOneAndUpdate({ name: module }, {
+      $inc: {
+        value: 1
+      }
     })
-    : await Module.create({
-      name: module,
-      value: 1
+    : await Module.create({ name: module, value: 1 });
+
+    const moduleInUser = await User.findOne({
+      '_id': verifiedUser.user._id,
+      'moduleUsed.name': module
     });
 
-    await User.findByIdAndUpdate(verifiedJWT.user._id, {
+    moduleInUser ?
+    await User.findOneAndUpdate({
+      '_id': verifiedUser.user._id,
+      'moduleUsed.name': module
+    }, {
+      $inc: {
+        'moduleUsed.$.value': 1
+      }
+    })
+    : await User.findByIdAndUpdate(verifiedUser.user._id, {
       $push: {
         moduleUsed: {
           name: module,
@@ -36,7 +46,18 @@ router.post('/module_usage', (req, res, next) => {
     });
   });
 
-  res.json({ modules });
+  res.json({ 'result': 'ok' });
+});
+
+router.post('/top5', async (req, res, next) => {
+  const secret: string | undefined = process.env.JWT_SECRET;
+
+  const verifiedUser: any = secret && jwt.verify(req.body.jwttoken, secret);
+  const user = await User.findById(verifiedUser.user._id);
+  const userTop5 = _.take(_.orderBy(user?.moduleUsed, 'value', 'desc'), 5);
+  const totalTop5 = await Module.find().sort({ value: -1 }).limit(5);
+  
+  res.json({ userTop5, totalTop5 });
 });
  
 export default router;
