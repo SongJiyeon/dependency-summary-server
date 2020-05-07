@@ -7,10 +7,8 @@ import createError, { HttpError } from 'http-errors';
 import express, { Request, Response, NextFunction } from 'express';
 
 import indexRouter from './routes/index';
+import apiRouter from './routes/api';
 import authRouter from './routes/auth';
-
-import BaseRouter from './routes/index';
-import AuthRouter from './routes/auth';
 
 dotenv.config();
 
@@ -26,12 +24,16 @@ mongoose.connect(`${DB_URL}`, {
   useFindAndModify: false
 });
 
+app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use('/api', indexRouter);
+app.use('/', indexRouter);
+app.use('/api', apiRouter);
 app.use('/auth', authRouter);
 
 app.use(function(req, res, next) {

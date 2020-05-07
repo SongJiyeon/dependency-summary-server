@@ -4,12 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("./routes/index"));
+const api_1 = __importDefault(require("./routes/api"));
 const auth_1 = __importDefault(require("./routes/auth"));
 dotenv_1.default.config();
 const app = express_1.default();
@@ -21,11 +23,14 @@ mongoose_1.default.connect(`${DB_URL}`, {
     useUnifiedTopology: true,
     useFindAndModify: false
 });
+app.set('view engine', 'ejs');
+app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-app.use('/api', index_1.default);
+app.use('/', index_1.default);
+app.use('/api', api_1.default);
 app.use('/auth', auth_1.default);
 app.use(function (req, res, next) {
     next(http_errors_1.default(404));
