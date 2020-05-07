@@ -48,6 +48,6 @@ app.use(function(err: HttpError, req: Request, res: Response, next: NextFunction
     res.render('error');
 });
 
-server.listen(4000);
+server.listen(process.env.PORT || '8080');
 
 module.exports = app;
