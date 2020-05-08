@@ -53,4 +53,11 @@ router.post('/top5', async (req, res, next) => {
     const totalTop5 = await Module_1.default.find().sort({ value: -1 }).limit(5);
     res.json({ userTop5, totalTop5 });
 });
+router.get('/hello', (req, res) => {
+    res.render('index', { text: 'hello' });
+});
+router.post('/hello', (req, res, next) => {
+    console.log(req.body.data);
+    res.json({ 'result': 'ok' });
+});
 exports.default = router;
