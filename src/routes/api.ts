@@ -59,5 +59,15 @@ router.post('/top5', async (req, res, next) => {
   
   res.json({ userTop5, totalTop5 });
 });
+
+router.get('/hello', (req, res) => {
+  res.render('index', { text: 'hello' });
+});
+
+router.post('/hello', (req, res, next) => {
+  console.log(req.body.data);
+
+  res.json({ 'result': 'ok' });
+});
  
 export default router;
