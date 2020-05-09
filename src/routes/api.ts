@@ -65,7 +65,7 @@ router.get('/hello', (req, res) => {
 });
 
 router.post('/hello', (req, res, next) => {
-  console.log(req.body.data);
+  console.log(req.body);
 
   res.json({ 'result': 'ok' });
 });
