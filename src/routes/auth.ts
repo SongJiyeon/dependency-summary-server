@@ -6,7 +6,26 @@ import User, { UserType } from '../models/User';
 
 const router = Router();
 
+router.get('/login/callback', (req, res) => {
+  console.log(req);
+  res.json({ 'result': 'ok' });
+});
+
+router.get('/login', (req, res, next) => {
+  console.log(req.query.client_id);
+  axios({
+    method: 'get',
+    url: 'https://github.com/login/oauth/authorize',
+    params: {
+      client_id: req.query.client_id,
+      redirect_uri: 'http://localhost:8080/auth/login/callback'
+    }
+  });
+  res.json({ 'result': 'ok' });
+});
+
 router.post('/login', async (req, res, next) => {
+  console.log(req);
   const githubUser: UserType = (
     await axios({
       method: 'get',
